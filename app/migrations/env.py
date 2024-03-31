@@ -6,7 +6,7 @@ from flask import current_app
 from alembic import context
 from sqlalchemy import create_engine
 
-from app.utils import Base
+from app.model.db import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
