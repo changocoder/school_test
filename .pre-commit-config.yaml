@@ -1,0 +1,32 @@
+default_language_version:
+  python: python3.11
+exclude: '[\w-]+\d+[^/]*\.py'
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: check-added-large-files
+        args: [ --maxkb=500 ]
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-yaml
+        args: [ "--unsafe" ] # Instead of loading the files, simply parse them for syntax
+      - id: mixed-line-ending
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        exclude_types: [ text ] # exclude golden files
+        args: ['--autofix']
+        additional_dependencies: ['flake8-mutable', 'flake8-comprehensions']
+  - repo: https://github.com/psf/black
+    rev: 22.6.0
+    hooks:
+      - id: black
+  - repo: https://github.com/asottile/reorder_python_imports
+    rev: v3.8.1
+    hooks:
+      - id: reorder-python-imports
+  - repo: https://github.com/pycqa/flake8
+    rev: 4.0.1
+    hooks:
+      - id: flake8
+        args: ['--max-line-length', '120']
