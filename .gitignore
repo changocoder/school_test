@@ -137,4 +137,4 @@ cython_debug/
 # Poetry
 poetry.lock
 pyproject.toml
-.idea/
+.idea/*
