@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String
 
-from app.school.blueprints.utils import Base
+from app.utils import Base
 
 
 class User(Base):
@@ -9,3 +9,5 @@ class User(Base):
     name = Column(String)
     last_name = Column(String)
     email = Column(String, unique=True)
+    username = Column(String, unique=True)
+    password = Column(String)

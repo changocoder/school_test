@@ -1,5 +1,5 @@
-from app.school.blueprints.user.models import User
-from app.school.blueprints.utils import GenericService
+from app.model.user import User
+from app.service.base import GenericService
 
 
 class UserService(GenericService):
