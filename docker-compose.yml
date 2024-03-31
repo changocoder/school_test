@@ -1,0 +1,44 @@
+version: '3.3'
+
+networks:
+  school-network:
+    name: school-network
+    external: true
+
+volumes:
+  psqlvolume:
+    driver: local
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.8.6-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - school-network
+
+  school-db:
+    image: postgres:11.4
+    ports:
+      - "5432:5432"
+    volumes:
+      - psqlvolume:/var/lib/postgresql/data/
+    environment:
+      - PGTZ=America/Argentina/Buenos_Aires
+    networks:
+      - school-network
+
+  school-api:
+    build: .
+    volumes:
+      - ./app:/app
+    env_file:
+      - .env
+    ports:
+      - "7003:7003"
+    networks:
+      - school-network
+    depends_on:
+      - school-db
+
