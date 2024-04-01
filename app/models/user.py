@@ -1,5 +1,7 @@
-from sqlalchemy import Column, String, Boolean
-from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import String
+from werkzeug.security import generate_password_hash
 
 from app.models.db import Base
 

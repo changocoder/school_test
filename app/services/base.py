@@ -1,6 +1,6 @@
 from abc import ABC
 
-from app.extension import db
+from app.flask_app import db
 
 
 class GenericService(ABC):

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -e
-
-gunicorn -w $WORKERS  -b 0.0.0.0:8000 $FLASK_APP
+flask db upgrade
+gunicorn -w $WORKERS  -b 0.0.0.0:$FLASK_RUN_PORT $FLASK_APP

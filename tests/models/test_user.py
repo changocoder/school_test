@@ -11,7 +11,7 @@ class TestUser(ShcoolDBTest):
             email="test@gmail.com",
             username="johndoe",
             is_active=True,
-            is_admin=False
+            is_admin=False,
         )
         user.set_password("123456")
 
@@ -19,6 +19,6 @@ class TestUser(ShcoolDBTest):
         self.session.commit()
 
         user_inserted = self.session.query(User).first()
-        import pdb; pdb.set_trace()
+
         self.assertEqual(user_inserted.name, "John")
         self.assertEqual(user_inserted.last_name, "Doe")

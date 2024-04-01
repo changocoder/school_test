@@ -5,11 +5,10 @@ from alembic.config import Config
 
 from app.app_factory import initialize_app
 from app.config import TestConfig
-from app.extension import db
+from app.flask_app import db
 
 
 class ShcoolDBTest(TestCase):
-
     def create_app(self):
         return initialize_app(TestConfig)
 
@@ -19,16 +18,14 @@ class ShcoolDBTest(TestCase):
         self.app_context.push()
         self.app.testing = True
         self.client = self.app.test_client()
-        self.headers = {
-            'Content-Type': 'application/json'
-        }
+        self.headers = {"Content-Type": "application/json"}
         self.session = db.session
         self.alembic_config = Config(TestConfig.ALEMBIC_INI_PATH)
-        command.upgrade(self.alembic_config, 'head')
+        command.upgrade(self.alembic_config, "head")
 
     def tearDown(self):
         if self.session:
             self.session.remove()
-        command.downgrade(self.alembic_config, 'base')
+        command.downgrade(self.alembic_config, "base")
         db.Model.metadata.drop_all(db.engine)
         self.app_context.pop()

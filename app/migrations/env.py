@@ -1,9 +1,8 @@
 import logging
 from logging.config import fileConfig
 
-from flask import current_app
-
 from alembic import context
+from flask import current_app
 from sqlalchemy import create_engine
 
 from app.models.db import Base
@@ -15,7 +14,7 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
-logger = logging.getLogger('alembic.env')
+logger = logging.getLogger("alembic.env")
 
 
 target_metadata = Base.metadata
@@ -25,6 +24,7 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
+
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
@@ -44,7 +44,7 @@ def run_migrations_offline():
         target_metadata=target_metadata,
         literal_binds=True,
         check_types=True,
-        compare_type=True
+        compare_type=True,
     )
 
     with context.begin_transaction():
@@ -59,15 +59,14 @@ def run_migrations_online():
 
     """
 
-    connectable = create_engine(
-        current_app.config.get("SQLALCHEMY_DATABASE_URI"))
+    connectable = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
 
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
             check_types=True,
-            compare_type=True
+            compare_type=True,
         )
 
         with context.begin_transaction():
