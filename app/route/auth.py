@@ -3,9 +3,9 @@ from flask import request, redirect, url_for, json
 from flask_login import login_manager, current_user, logout_user, login_user, login_required
 
 from app.config import ConfigClass
-from app.model.user import User
+from app.models.user import User
 from app.runner import app, client
-from app.service.user import UserService
+from app.services.user import UserService
 
 
 @login_manager.user_loader

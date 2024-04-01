@@ -19,6 +19,14 @@ class GenericService(ABC):
         return cls._session.query(cls._model).all()
 
     @classmethod
+    def get_all_by_filter(cls, **kwargs):
+        return cls._session.query(cls._model).filter_by(**kwargs).all()
+
+    @classmethod
+    def get_first_by_filter(cls, **kwargs):
+        return cls._session.query(cls._model).filter_by(**kwargs).first()
+
+    @classmethod
     def create(cls, **kwargs):
         instance = cls._model(**kwargs)
         cls._session.add(instance)

@@ -1,14 +1,8 @@
-import datetime
 import uuid
-from abc import ABC
-from typing import Type
+
 
 from flask import current_app
 from flask.views import MethodView
-from sqlalchemy import Column, DateTime, String, Boolean
-from sqlalchemy.ext.declarative import declarative_base
-
-from app.extension import db
 
 
 def generate_uuid():

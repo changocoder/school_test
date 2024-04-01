@@ -1,7 +1,7 @@
 import datetime
 
 from sqlalchemy import Column, DateTime, String, Boolean
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from app.utils import generate_uuid
 

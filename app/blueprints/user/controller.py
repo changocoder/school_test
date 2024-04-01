@@ -4,8 +4,8 @@ from flask import jsonify, request
 from marshmallow import ValidationError
 
 
-from app.schema.user import UserSchema
-from app.service.user import UserService
+from app.schemas.user import UserSchema
+from app.services.user import UserService
 from app.utils import BaseMethod
 
 

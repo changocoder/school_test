@@ -1,8 +1,4 @@
 from flask import Flask
-from flask_login import LoginManager
-from oauthlib.oauth2 import WebApplicationClient
-
-from app.config import ConfigClass
 
 
 def create_app(config_class, blueprints):

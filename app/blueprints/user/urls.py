@@ -1,4 +1,4 @@
-from app.school.blueprints.user.controller import UserController
+from app.blueprints.user.controller import UserController
 
 
 def map_urls(blueprint):
