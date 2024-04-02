@@ -24,10 +24,10 @@ services:
       - "5432:5432"
     volumes:
       - psqlvolume:/var/lib/postgresql/data/
-    environment:
-      - PGTZ=America/Argentina/Buenos_Aires
     networks:
       - school-network
+    env_file:
+      - .env
 
   school-api:
     build: .

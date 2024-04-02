@@ -22,3 +22,18 @@ class TestUser(ShcoolDBTest):
 
         self.assertEqual(user_inserted.name, "John")
         self.assertEqual(user_inserted.last_name, "Doe")
+
+    def test_user_model_password(self):
+
+        user = User(
+            name="John",
+            last_name="Doe",
+            email="test@test.com",
+            username="johndoe",
+            is_active=True,
+            is_admin=False,
+        )
+
+        user.set_password("123456")
+
+        self.assertTrue(user.password)
