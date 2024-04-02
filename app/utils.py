@@ -8,26 +8,21 @@ def generate_uuid():
     return str(uuid.uuid4())
 
 
-def register_api(view, endpoint, url, pk="id", pk_type="str"):
-    view_func = view.as_view(endpoint)
-    current_app.add_url_rule(
-        url,
-        defaults={pk: None},
-        view_func=view_func,
-        methods=[
-            "GET",
-        ],
+def register_resource_routes(bp, view, resource_name):
+    bp.add_url_rule(
+        "/",
+        defaults={f"{resource_name}_id": None},
+        view_func=view,
+        methods=["GET"],
     )
-    current_app.add_url_rule(
-        url,
-        view_func=view_func,
-        methods=[
-            "POST",
-        ],
+    bp.add_url_rule(
+        "/",
+        view_func=view,
+        methods=["POST"],
     )
-    current_app.add_url_rule(
-        f"{url}<{pk_type}:{pk}>",
-        view_func=view_func,
+    bp.add_url_rule(
+        f"/<string:{resource_name}_id>",
+        view_func=view,
         methods=["GET", "PUT", "DELETE"],
     )
 
