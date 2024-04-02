@@ -9,7 +9,7 @@ load_dotenv()
 class ConfigClass:
     """Config class for the application."""
 
-    DEBUG = True
+    FLASK_DEBUG = os.environ.get("FLASK_DEBUG", int)
     TESTING = False
     SECRET = os.environ.get("SECRET")
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URI")
@@ -30,13 +30,14 @@ class ConfigClass:
 class DevelopmentConfig(ConfigClass):
     """Config class for development."""
 
-    DEBUG = True
+    FLASK_DEBUG = 1
     TESTING = False
 
 
 class ProductionConfig(ConfigClass):
     """Config class for production."""
 
+    FLASK_DEBUG = 0
     DEBUG = False
     TESTING = False
 
@@ -44,7 +45,7 @@ class ProductionConfig(ConfigClass):
 class TestConfig(ConfigClass):
     """Config class for testing."""
 
-    DEBUG = True
+    FLASK_DEBUG = 1
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_TEST_URI")
     ALEMBIC_INI_PATH = "app/migrations/alembic.ini"

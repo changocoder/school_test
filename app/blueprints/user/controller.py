@@ -1,8 +1,8 @@
 from http import HTTPStatus
 
-from flask import jsonify, request
+from flask import jsonify
+from flask import request
 from marshmallow import ValidationError
-
 
 from app.schemas.user import UserSchema
 from app.services.user import UserService
