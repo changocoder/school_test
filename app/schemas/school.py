@@ -63,6 +63,7 @@ class StudentSchema(Schema):
     email = fields.String(required=True)
     nationality = fields.String(required=True)
     school_id = fields.UUID(required=True)
+    is_active = fields.Boolean(required=False)
 
     class Meta:
         unknown = EXCLUDE
@@ -129,6 +130,24 @@ class AttendanceDumpSchema(Schema):
     attendance_details = fields.List(
         fields.Nested(AttendanceDetailSchema), dump_only=True
     )
+
+    class Meta:
+        unknown = EXCLUDE
+
+
+class AttendanceReportDumpSchema(Schema):
+    course = fields.Nested(CourseSchema, dump_only=True)
+    attendance = fields.Nested(AttendanceDumpSchema, dump_only=True)
+    total_students_enrolled = fields.Integer(dump_only=True)
+    total_students_present = fields.Integer(dump_only=True)
+    total_students_absent = fields.Integer(dump_only=True)
+
+    class Meta:
+        unknown = EXCLUDE
+
+
+class ReportCourseAttendanceSchema(Schema):
+    date_attendance = fields.Date(required=True)
 
     class Meta:
         unknown = EXCLUDE

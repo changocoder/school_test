@@ -3,8 +3,10 @@ from flask import Blueprint
 from .school_controller import AttendanceController
 from .school_controller import ClassroomController
 from .school_controller import CourseController
+from .school_controller import DisableStudentController
 from .school_controller import EnrollStudentController
 from .school_controller import PreceptorController
+from .school_controller import ReportCourseAttendanceController
 from .school_controller import SchoolController
 from .school_controller import StudentController
 from .school_controller import TeacherController
@@ -26,8 +28,12 @@ preceptor_view = PreceptorController.as_view("preceptor_controller")
 classroom_view = ClassroomController.as_view("classroom_controller")
 course_view = CourseController.as_view("course_controller")
 student_view = StudentController.as_view("student_controller")
+student_disabling_view = DisableStudentController.as_view("disable_student_controller")
 enroll_student_view = EnrollStudentController.as_view("enroll_student_controller")
 attendance_view = AttendanceController.as_view("attendance_controller")
+report_course_attendance_view = ReportCourseAttendanceController.as_view(
+    "report_course_attendance_controller"
+)
 
 # Custom routes
 course_bp.add_url_rule(
@@ -35,6 +41,20 @@ course_bp.add_url_rule(
     view_func=enroll_student_view,
     methods=[
         "POST",
+    ],
+)
+course_bp.add_url_rule(
+    "/<uuid:course_id>/report-attendance/",
+    view_func=report_course_attendance_view,
+    methods=[
+        "GET",
+    ],
+)
+student_bp.add_url_rule(
+    "/<uuid:student_id>/disable",
+    view_func=student_disabling_view,
+    methods=[
+        "PUT",
     ],
 )
 

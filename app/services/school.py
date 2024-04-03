@@ -1,9 +1,11 @@
 from typing import List
 
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload
 
 from app.blueprints.exceptions import APIException
 from app.blueprints.exceptions import FilterException
+from app.blueprints.exceptions import NotFoundException
 from app.models.school import Attendance
 from app.models.school import AttendanceDetail
 from app.models.school import Classroom
@@ -127,6 +129,52 @@ class CourseService(GenericService):
     ):
         return course.school == student.school
 
+    @classmethod
+    def _get_attendance_by_date(cls, course, date_attendance: str):
+        attendance = next(
+            (att for att in course.attendances if att.date == date_attendance), None
+        )
+        if not attendance:
+            raise NotFoundException(
+                f"No attendance record found for course on date {date_attendance}"
+            )
+        return attendance
+
+    @classmethod
+    def get_by_id_and_date_attendance(cls, course_id: str, date_attendance: str):
+        try:
+            course = (
+                cls._session.query(Course)
+                .options(
+                    joinedload(Course.attendances).joinedload(
+                        Attendance.attendance_details
+                    )
+                )
+                .filter(Course.id == course_id)
+                .one_or_none()
+            )
+            if not course:
+                raise NotFoundException("Course not found")
+            total_students_enrolled = len(course.students)
+            # Ya que la fecha siempre está presente, busca directamente la asistencia correspondiente
+            attendance = cls._get_attendance_by_date(course, date_attendance)
+            total_present = sum(
+                detail.is_present for detail in attendance.attendance_details
+            )
+            total_absentees = sum(
+                not detail.is_present for detail in attendance.attendance_details
+            )
+
+            return {
+                "course": course,
+                "attendance": attendance,
+                "total_students_enrolled": total_students_enrolled,
+                "total_students_present": total_present,
+                "total_students_absent": total_absentees,
+            }
+        except SQLAlchemyError as e:
+            raise FilterException(f"Error in filter operation: {str(e)}")
+
 
 class StudentService(GenericService):
     _model = Student
@@ -135,6 +183,23 @@ class StudentService(GenericService):
     def get_by_name(cls, name: str):
         try:
             return cls._session.query(cls._model).filter_by(name=name).first()
+        except SQLAlchemyError as e:
+            raise FilterException(f"Error in filter operation: {str(e)}")
+
+    @classmethod
+    def check_if_student_is_active(cls, student_id: str):
+        try:
+            student = cls.get_by_id(student_id)
+            return student.is_active
+        except SQLAlchemyError as e:
+            raise FilterException(f"Error in filter operation: {str(e)}")
+
+    @classmethod
+    def disable_student(cls, student_id: str):
+        try:
+            student = cls.get_by_id(student_id)
+            student.is_active = False
+            cls._session.commit()
         except SQLAlchemyError as e:
             raise FilterException(f"Error in filter operation: {str(e)}")
 
@@ -174,6 +239,7 @@ class AttendanceDetailService(GenericService):
 
 class AttendanceService(GenericService):
     _model = Attendance
+    student_service = StudentService
 
     @classmethod
     def get_by_date(cls, date: str):
@@ -183,7 +249,7 @@ class AttendanceService(GenericService):
             raise FilterException(f"Error in filter operation: {str(e)}")
 
     @classmethod
-    def create_attendace_and_detail(cls, attendance_data: dict):
+    def create_attendance_and_detail(cls, attendance_data: dict):
         student_attendance_list = attendance_data.pop("students")
         attendance = cls.create(**attendance_data)
         cls.add_list_students_to_attendance(attendance, student_attendance_list)
@@ -194,13 +260,53 @@ class AttendanceService(GenericService):
         cls, attendance: Attendance, student_attendance_list: List[dict]
     ):
         for student_attendance in student_attendance_list:
-            attendance_detail = AttendanceDetail(
-                attendance_id=attendance.id,
-                student_id=student_attendance["student_id"],
-                is_present=student_attendance["is_present"],
-                absence_reason=student_attendance.get("reason_absence"),
-            )
-            cls._session.add(attendance_detail)
-
+            if cls.student_service.check_if_student_is_active(
+                student_attendance["student_id"]
+            ):
+                attendance_detail = AttendanceDetail(
+                    attendance_id=attendance.id,
+                    student_id=student_attendance["student_id"],
+                    is_present=student_attendance["is_present"],
+                    absence_reason=student_attendance.get("reason_absence"),
+                )
+                cls._session.add(attendance_detail)
         cls._session.commit()
         return attendance
+
+    @classmethod
+    def update_attendance_and_details(cls, attendance_id: str, attendance_data: dict):
+        student_attendance_list = attendance_data.pop("students")
+        try:
+            attendance_updated = cls.update(attendance_id, **attendance_data)
+            cls._update_attendance_details(attendance_updated, student_attendance_list)
+            return attendance_updated
+        except SQLAlchemyError as e:
+            raise FilterException(f"Error in update operation: {str(e)}")
+
+    @classmethod
+    def _update_attendance_details(
+        cls, attendance: Attendance, student_attendance_list: List[dict]
+    ):
+        for student_attendance in student_attendance_list:
+            student_id = student_attendance["student_id"]
+            attendance_detail = (
+                cls._session.query(AttendanceDetail)
+                .filter_by(attendance_id=attendance.id, student_id=student_id)
+                .one_or_none()
+            )
+
+            if attendance_detail:
+                attendance_detail.is_present = student_attendance["is_present"]
+                attendance_detail.absence_reason = student_attendance.get(
+                    "reason_absence"
+                )
+            else:
+                if cls.student_service.check_if_student_is_active(student_id):
+                    new_attendance_detail = AttendanceDetail(
+                        attendance_id=attendance.id,
+                        student_id=student_id,
+                        is_present=student_attendance["is_present"],
+                        absence_reason=student_attendance.get("reason_absence"),
+                    )
+                    cls._session.add(new_attendance_detail)
+        cls._session.commit()

@@ -21,7 +21,7 @@ def register_resource_routes(bp, view, resource_name):
         methods=["POST"],
     )
     bp.add_url_rule(
-        f"<string:{resource_name}_id>",
+        f"<uuid:{resource_name}_id>",
         view_func=view,
         methods=["GET", "PUT", "DELETE"],
     )
