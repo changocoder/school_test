@@ -113,11 +113,22 @@ class AttendanceSchema(Schema):
             raise ValidationError("Duplicated students in list")
 
 
+class AttendanceDetailSchema(Schema):
+    student = fields.Nested(StudentSchema, dump_only=True)
+    is_present = fields.Boolean(dump_only=True)
+    absence_reason = fields.Enum(AbsenceReasonEnum, dump_only=True)
+
+    class Meta:
+        unknown = EXCLUDE
+
+
 class AttendanceDumpSchema(Schema):
     id = fields.UUID(dump_only=True)
     date = fields.Date(dump_only=True)
-    course_id = fields.UUID(dump_only=True)
-    students = fields.List(fields.Nested(StudentAttendanceSchema))
+    course = fields.Nested(CourseSchema, dump_only=True)
+    attendance_details = fields.List(
+        fields.Nested(AttendanceDetailSchema), dump_only=True
+    )
 
     class Meta:
         unknown = EXCLUDE

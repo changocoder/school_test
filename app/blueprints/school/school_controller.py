@@ -282,7 +282,7 @@ class AttendanceController(MethodView):
             new_attendance = self.attendance_service.create_attendace_and_detail(
                 attendance_data
             )
-            return jsonify(self.schema.dump(new_attendance)), 201
+            return jsonify(self.dump_schema.dump(new_attendance)), 201
         except APIException as e:
             return jsonify({"error": e.description}), e.code
 
@@ -290,7 +290,7 @@ class AttendanceController(MethodView):
         try:
             if attendance_id:
                 attendance = self.attendance_service.get_by_id(attendance_id)
-                return jsonify(self.schema.dump(attendance))
+                return jsonify(self.dump_schema.dump(attendance))
             else:
                 attendances = self.attendance_service.get_all()
                 return jsonify(self.schema.dump(attendances, many=True))

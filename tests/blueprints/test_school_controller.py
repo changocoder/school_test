@@ -1,3 +1,4 @@
+from app.services.school import AttendanceService
 from app.services.school import ClassroomService
 from app.services.school import CourseService
 from app.services.school import PreceptorService
@@ -251,6 +252,7 @@ class TestAttendanceController(ShcoolDBTest):
         self.student_service = StudentService()
         self.classroom_service = ClassroomService()
         self.course_service = CourseService()
+        self.attendance_service = AttendanceService()
 
         self.school_data = {
             "name": "Test School",
@@ -322,7 +324,29 @@ class TestAttendanceController(ShcoolDBTest):
         response = self.client.post(
             "/api/v1/attendance/", json=data, headers=self.headers
         )
-        import pdb
 
-        pdb.set_trace()
         self.assertEqual(response.status_code, 201)
+
+    def test_get_attendance_controller(self):
+        data = {
+            "course_id": str(self.course_obj.id),
+            "date": "2024-03-01",
+            "students": [
+                {
+                    "student_id": str(self.student_obj.id),
+                    "is_present": True,
+                },
+                {
+                    "student_id": str(self.student_obj_2.id),
+                    "is_present": False,
+                    "reason_absence": "ILLNESS",
+                },
+            ],
+        }
+        attendance_obj = self.attendance_service.create_attendace_and_detail(data)
+
+        response = self.client.get(
+            f"/api/v1/attendance/{attendance_obj.id}", headers=self.headers
+        )
+
+        self.assertEqual(response.status_code, 200)
