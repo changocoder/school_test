@@ -45,17 +45,12 @@ class TestSchoolModels(ShcoolDBTest):
         self.assertEqual(school_inserted.address, "Av. Siempreviva 123")
         self.assertEqual(school_inserted.phone, "123456789")
 
-    def test_create_teacher_with_school(self):
-        school = School(name="Test School", address="123 Main St", phone="123-456-7890")
-        self.session.add(school)
-        self.session.commit()
-
+    def test_create_teacher(self):
         teacher = Teacher(
             name="Alice",
             last_name="Smith",
             document="98765432",
             specialty="Mathematics",
-            school_id=school.id,
         )
 
         self.session.add(teacher)
@@ -67,7 +62,6 @@ class TestSchoolModels(ShcoolDBTest):
         self.assertEqual(teacher_inserted.last_name, "Smith")
         self.assertEqual(teacher_inserted.document, "98765432")
         self.assertEqual(teacher_inserted.specialty, "Mathematics")
-        self.assertEqual(teacher_inserted.school_id, school.id)
 
     def test_create_preceptor_with_school(self):
         school = School(name="Test School", address="123 Main St", phone="123-456-7890")

@@ -5,13 +5,16 @@ from flask.views import MethodView
 from app.blueprints.exceptions import APIException
 from app.schemas.school import ClassroomSchema
 from app.schemas.school import CourseSchema
+from app.schemas.school import EnrollStudentSchema
 from app.schemas.school import PreceptorSchema
 from app.schemas.school import SchoolSchema
+from app.schemas.school import StudentSchema
 from app.schemas.school import TeacherSchema
 from app.services.school import ClassroomService
 from app.services.school import CourseService
 from app.services.school import PreceptorService
 from app.services.school import SchoolService
+from app.services.school import StudentService
 from app.services.school import TeacherService
 
 
@@ -206,5 +209,60 @@ class CourseController(MethodView):
         try:
             self.service.delete(course_id)
             return jsonify({}), 204
+        except APIException as e:
+            return jsonify({"error": e.description}), e.code
+
+
+class StudentController(MethodView):
+    service = StudentService()
+    schema = StudentSchema()
+
+    def get(self, student_id=None):
+        try:
+            if student_id:
+                student = self.service.get_by_id(student_id)
+                return jsonify(self.schema.dump(student))
+            else:
+                students = self.service.get_all()
+                return jsonify(self.schema.dump(students, many=True))
+        except APIException as e:
+            return jsonify({"error": e.description}), e.code
+
+    def post(self):
+        try:
+            student_data = self.schema.load(request.json)
+            new_student = self.service.create(**student_data)
+            return jsonify(self.schema.dump(new_student)), 201
+        except APIException as e:
+            return jsonify({"error": e.description}), e.code
+
+    def put(self, student_id):
+        try:
+            student_data = self.schema.load(request.json)
+            updated_student = self.service.update(student_id, **student_data)
+            return jsonify(self.schema.dump(updated_student))
+        except APIException as e:
+            return jsonify({"error": e.description}), e.code
+
+    def delete(self, student_id):
+        try:
+            self.service.delete(student_id)
+            return jsonify({}), 204
+        except APIException as e:
+            return jsonify({"error": e.description}), e.code
+
+
+class EnrollStudentController(MethodView):
+    course_service = CourseService()
+    student_service = StudentService()
+    schema = EnrollStudentSchema()
+
+    def post(self):
+        try:
+            data_enroll = self.schema.load(request.json)
+
+            self.course_service.enroll_student(data_enroll)
+
+            return jsonify({"message": "Student enrolled successfully"}), 204
         except APIException as e:
             return jsonify({"error": e.description}), e.code
