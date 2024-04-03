@@ -1,5 +1,6 @@
 from marshmallow import EXCLUDE
 from marshmallow import fields
+from marshmallow import pre_load
 from marshmallow import Schema
 from marshmallow import validates
 from marshmallow import ValidationError
@@ -83,16 +84,17 @@ class StudentAttendanceSchema(Schema):
     class Meta:
         unknown = EXCLUDE
 
-    @validates("reason_absence")
-    def validate_reason_absence(self, value):
-        if value is None:
-            return
+    @pre_load
+    def validate_absence_reason(self, data, **kwargs):
+        if data.get("is_present"):
+            data.pop("reason_absence", None)
+        else:
+            if not data.get("reason_absence"):
+                raise ValidationError("Reason absence is required")
+        return data
 
-        if value not in [reason.value for reason in AbsenceReasonEnum]:
-            raise ValidationError("Invalid absence reason")
 
-
-class AttendanceDetailSchema(Schema):
+class AttendanceSchema(Schema):
     id = fields.UUID(dump_only=True)
     date = fields.Date(required=True)
     course_id = fields.UUID(required=True)
@@ -109,3 +111,13 @@ class AttendanceDetailSchema(Schema):
         students_ids = [student["student_id"] for student in value]
         if len(students_ids) != len(set(students_ids)):
             raise ValidationError("Duplicated students in list")
+
+
+class AttendanceDumpSchema(Schema):
+    id = fields.UUID(dump_only=True)
+    date = fields.Date(dump_only=True)
+    course_id = fields.UUID(dump_only=True)
+    students = fields.List(fields.Nested(StudentAttendanceSchema))
+
+    class Meta:
+        unknown = EXCLUDE

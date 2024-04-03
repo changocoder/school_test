@@ -19,14 +19,15 @@ depends_on = None
 
 def upgrade():
     # Crear el Enum para las razones de ausencia
-    absence_reason_enum = ENUM('illness', 'personal matter', 'medical appointment', 'rainy day', 'other',
+    absence_reason_enum = ENUM('ILLNESS', 'PERSONAL MATTER', 'MEDICAL APPOINTMENT', 'RAINY DAY', 'OTHER',
                                name='absence_reason_enum')
 
     # Crear la tabla 'attendances'
     op.create_table('attendances',
                     sa.Column('id', UUID(as_uuid=True), primary_key=True),
-                    sa.Column('date', sa.Date(), nullable=False),
+                    sa.Column('date', sa.Date(), nullable=False, unique=True),
                     sa.Column('is_rainy_day', sa.Boolean(), nullable=False, default=False),
+                    sa.Column('course_id', UUID(as_uuid=True), sa.ForeignKey('courses.id')),
                     sa.Column('created_at', sa.DateTime(), nullable=False),
                     sa.Column('updated_at', sa.DateTime(), nullable=False),
                     sa.Column('is_deleted', sa.Boolean(), nullable=False),
@@ -48,7 +49,6 @@ def upgrade():
 
 
 def downgrade():
-    # Comandos para revertir los cambios
     op.drop_table('attendance_details')
     op.drop_table('attendances')
 

@@ -4,8 +4,8 @@ from enum import Enum
 class AbsenceReasonEnum(Enum):
     """Enum para los motivos de ausencia."""
 
-    ILLNESS = "illness"
-    PERSONAL_MATTER = "personal matter"
-    MEDICAL_APPOINTMENT = "medical appointment"
-    RAINY_DAY = "rainy day"
-    OTHER = "other"
+    ILLNESS = "ILLNESS"
+    PERSONAL_MATTER = "PERSONAL MATTER"
+    MEDICAL_APPOINTMENT = "MEDICAL APPOINTMENT"
+    RAINY_DAY = "RAINY DAY"
+    OTHER = "OTHER"

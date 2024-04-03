@@ -1,5 +1,6 @@
 from flask import Blueprint
 
+from .school import attendance_bp
 from .school import classroom_bp
 from .school import course_bp
 from .school import preceptor_bp
@@ -21,3 +22,4 @@ api_v1_bp.register_blueprint(preceptor_bp)
 api_v1_bp.register_blueprint(classroom_bp)
 api_v1_bp.register_blueprint(course_bp)
 api_v1_bp.register_blueprint(student_bp)
+api_v1_bp.register_blueprint(attendance_bp)

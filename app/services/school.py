@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.blueprints.exceptions import APIException
@@ -179,3 +181,26 @@ class AttendanceService(GenericService):
             return cls._session.query(cls._model).filter_by(date=date).first()
         except SQLAlchemyError as e:
             raise FilterException(f"Error in filter operation: {str(e)}")
+
+    @classmethod
+    def create_attendace_and_detail(cls, attendance_data: dict):
+        student_attendance_list = attendance_data.pop("students")
+        attendance = cls.create(**attendance_data)
+        cls.add_list_students_to_attendance(attendance, student_attendance_list)
+        return attendance
+
+    @classmethod
+    def add_list_students_to_attendance(
+        cls, attendance: Attendance, student_attendance_list: List[dict]
+    ):
+        for student_attendance in student_attendance_list:
+            attendance_detail = AttendanceDetail(
+                attendance_id=attendance.id,
+                student_id=student_attendance["student_id"],
+                is_present=student_attendance["is_present"],
+                absence_reason=student_attendance.get("reason_absence"),
+            )
+            cls._session.add(attendance_detail)
+
+        cls._session.commit()
+        return attendance

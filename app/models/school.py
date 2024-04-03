@@ -66,6 +66,7 @@ class Course(Base):
     preceptor_id = Column(UUID(as_uuid=True), ForeignKey("preceptors.id"))
     preceptor = relationship("Preceptor")
     students = relationship("Student", back_populates="course")
+    attendances = relationship("Attendance", back_populates="course")
 
 
 class Student(Person):
@@ -100,7 +101,8 @@ class AttendanceDetail(Base):
 
 class Attendance(Base):
     __tablename__ = "attendances"
-    id = Column(UUID(as_uuid=True), primary_key=True)
-    date = Column(Date, nullable=False)
+    date = Column(Date, nullable=False, unique=True)
     is_rainy_day = Column(Boolean, nullable=False, default=False)
+    course_id = Column(UUID(as_uuid=True), ForeignKey("courses.id"))
+    course = relationship("Course")
     attendance_details = relationship("AttendanceDetail", back_populates="attendance")

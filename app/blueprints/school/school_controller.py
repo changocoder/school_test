@@ -3,6 +3,8 @@ from flask import request
 from flask.views import MethodView
 
 from app.blueprints.exceptions import APIException
+from app.schemas.school import AttendanceDumpSchema
+from app.schemas.school import AttendanceSchema
 from app.schemas.school import ClassroomSchema
 from app.schemas.school import CourseSchema
 from app.schemas.school import EnrollStudentSchema
@@ -10,6 +12,7 @@ from app.schemas.school import PreceptorSchema
 from app.schemas.school import SchoolSchema
 from app.schemas.school import StudentSchema
 from app.schemas.school import TeacherSchema
+from app.services.school import AttendanceService
 from app.services.school import ClassroomService
 from app.services.school import CourseService
 from app.services.school import PreceptorService
@@ -264,5 +267,49 @@ class EnrollStudentController(MethodView):
             self.course_service.enroll_student(data_enroll)
 
             return jsonify({"message": "Student enrolled successfully"}), 204
+        except APIException as e:
+            return jsonify({"error": e.description}), e.code
+
+
+class AttendanceController(MethodView):
+    attendance_service = AttendanceService()
+    schema = AttendanceSchema()
+    dump_schema = AttendanceDumpSchema()
+
+    def post(self):
+        try:
+            attendance_data = self.schema.load(request.json)
+            new_attendance = self.attendance_service.create_attendace_and_detail(
+                attendance_data
+            )
+            return jsonify(self.schema.dump(new_attendance)), 201
+        except APIException as e:
+            return jsonify({"error": e.description}), e.code
+
+    def get(self, attendance_id=None):
+        try:
+            if attendance_id:
+                attendance = self.attendance_service.get_by_id(attendance_id)
+                return jsonify(self.schema.dump(attendance))
+            else:
+                attendances = self.attendance_service.get_all()
+                return jsonify(self.schema.dump(attendances, many=True))
+        except APIException as e:
+            return jsonify({"error": e.description}), e.code
+
+    def put(self, attendance_id):
+        try:
+            attendance_data = self.schema.load(request.json)
+            updated_attendance = self.attendance_service.update(
+                attendance_id, **attendance_data
+            )
+            return jsonify(self.schema.dump(updated_attendance))
+        except APIException as e:
+            return jsonify({"error": e.description}), e.code
+
+    def delete(self, attendance_id):
+        try:
+            self.attendance_service.delete(attendance_id)
+            return jsonify({}), 204
         except APIException as e:
             return jsonify({"error": e.description}), e.code

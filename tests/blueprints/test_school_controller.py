@@ -240,3 +240,89 @@ class TestSchoolController(ShcoolDBTest):
         )
 
         self.assertEqual(response.status_code, 204)
+
+
+class TestAttendanceController(ShcoolDBTest):
+    def setUp(self):
+        super().setUp()
+        self.school_service = SchoolService()
+        self.teacher_service = TeacherService()
+        self.preceptor_service = PreceptorService()
+        self.student_service = StudentService()
+        self.classroom_service = ClassroomService()
+        self.course_service = CourseService()
+
+        self.school_data = {
+            "name": "Test School",
+            "address": "Test Address",
+            "phone": "123456789",
+        }
+        self.school_obj = self.school_service.create(**self.school_data)
+        self.teacher_data = {
+            "name": "Test Teacher",
+            "last_name": "Test Last Name",
+            "document": "123456783",
+            "specialty": "Test Specialty",
+            "school_id": str(self.school_obj.id),
+        }
+        self.teacher_obj = self.teacher_service.create(**self.teacher_data)
+        self.preceptor_data = {
+            "name": "Test Preceptor",
+            "last_name": "Test Last Name",
+            "document": "123456784",
+            "school_id": str(self.school_obj.id),
+        }
+        self.preceptor_obj = self.preceptor_service.create(**self.preceptor_data)
+        self.course_data = {
+            "name": "Test Course",
+            "school_id": str(self.school_obj.id),
+            "teacher_id": str(self.teacher_obj.id),
+            "preceptor_id": str(self.preceptor_obj.id),
+        }
+        self.course_obj = self.course_service.create(**self.course_data)
+        self.student_data = {
+            "name": "Test Student",
+            "last_name": "Test Last Name",
+            "document": "123456789",
+            "email": "test@test.com",
+            "nationality": "Argentino",
+            "school_id": str(self.school_obj.id),
+            "course_id": str(self.course_obj.id),
+        }
+
+        self.student_data_2 = {
+            "name": "Student2",
+            "last_name": "Last Name2",
+            "document": "123456781",
+            "email": "test1@test.com",
+            "nationality": "Argentino",
+            "school_id": str(self.school_obj.id),
+            "course_id": str(self.course_obj.id),
+        }
+
+        self.student_obj = self.student_service.create(**self.student_data)
+        self.student_obj_2 = self.student_service.create(**self.student_data_2)
+
+    def test_create_attendance_controller(self):
+        data = {
+            "course_id": str(self.course_obj.id),
+            "date": "2024-03-01",
+            "students": [
+                {
+                    "student_id": str(self.student_obj.id),
+                    "is_present": True,
+                },
+                {
+                    "student_id": str(self.student_obj_2.id),
+                    "is_present": False,
+                    "reason_absence": "ILLNESS",
+                },
+            ],
+        }
+        response = self.client.post(
+            "/api/v1/attendance/", json=data, headers=self.headers
+        )
+        import pdb
+
+        pdb.set_trace()
+        self.assertEqual(response.status_code, 201)
