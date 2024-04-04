@@ -2,6 +2,7 @@ from sqlalchemy import Boolean
 from sqlalchemy import Column
 from sqlalchemy import Date
 from sqlalchemy import Enum
+from sqlalchemy import Float
 from sqlalchemy import ForeignKey
 from sqlalchemy import String
 from sqlalchemy import UUID
@@ -24,6 +25,8 @@ class School(Base):
     name = Column(String)
     address = Column(String)
     phone = Column(String)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)
 
     teachers = relationship("Teacher", back_populates="school")
     preceptors = relationship("Preceptor", back_populates="school")

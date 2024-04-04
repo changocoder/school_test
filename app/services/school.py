@@ -1,4 +1,5 @@
 from typing import List
+from uuid import UUID
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import joinedload
@@ -6,6 +7,7 @@ from sqlalchemy.orm import joinedload
 from app.blueprints.exceptions import APIException
 from app.blueprints.exceptions import FilterException
 from app.blueprints.exceptions import NotFoundException
+from app.models.enums import AbsenceReasonEnum
 from app.models.school import Attendance
 from app.models.school import AttendanceDetail
 from app.models.school import Classroom
@@ -15,6 +17,7 @@ from app.models.school import School
 from app.models.school import Student
 from app.models.school import Teacher
 from app.services.base import GenericService
+from app.services.weather_service import get_weather_with_fallback
 
 
 class SchoolService(GenericService):
@@ -187,7 +190,8 @@ class StudentService(GenericService):
             raise FilterException(f"Error in filter operation: {str(e)}")
 
     @classmethod
-    def check_if_student_is_active(cls, student_id: str):
+    def check_if_student_is_active(cls, student_id: str | UUID):
+
         try:
             student = cls.get_by_id(student_id)
             return student.is_active
@@ -252,7 +256,13 @@ class AttendanceService(GenericService):
     def create_attendance_and_detail(cls, attendance_data: dict):
         student_attendance_list = attendance_data.pop("students")
         attendance = cls.create(**attendance_data)
-        cls.add_list_students_to_attendance(attendance, student_attendance_list)
+
+        if cls.get_is_raining(attendance):
+
+            student_ids = [student["student_id"] for student in student_attendance_list]
+            cls.mark_students_as_absent_due_to_rain(attendance, student_ids)
+        else:
+            cls.add_list_students_to_attendance(attendance, student_attendance_list)
         return attendance
 
     @classmethod
@@ -310,3 +320,30 @@ class AttendanceService(GenericService):
                     )
                     cls._session.add(new_attendance_detail)
         cls._session.commit()
+
+    @classmethod
+    def get_is_raining(cls, attendance: Attendance):
+        school = attendance.course.school
+        date_attendance = attendance.date
+        # Convertir la fecha a formato ISO 8601 para la API de clima
+        check_time = date_attendance.isoformat()
+        return get_weather_with_fallback(school.latitude, school.longitude, check_time)
+
+    @classmethod
+    def mark_students_as_absent_due_to_rain(
+        cls, attendance: Attendance, student_ids: List[UUID]
+    ):
+        for student_id in student_ids:
+            if cls.student_service.check_if_student_is_active(student_id):
+                try:
+                    attendance_detail = AttendanceDetail(
+                        attendance_id=attendance.id,
+                        student_id=student_id,
+                        is_present=False,
+                        absence_reason=AbsenceReasonEnum.RAINY_DAY.value,
+                    )
+                    cls._session.add(attendance_detail)
+                except SQLAlchemyError as e:
+                    raise APIException(f"Error marking student as absent: {str(e)}")
+        cls._session.commit()
+        return attendance

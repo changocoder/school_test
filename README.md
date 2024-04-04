@@ -6,7 +6,12 @@ This is a school app that allows you to manage students, teachers, and courses. 
 poetry install
 ```
 
-## Usage
+## Run Tests
 ```bash
-sh ./entrypoint.sh
+docker-compose -f docker-compose-test.yml run --rm --entrypoint="pytest -vv" school-api
+```
+
+## Run Server
+```bash
+docker-compose up --build -d
 ```

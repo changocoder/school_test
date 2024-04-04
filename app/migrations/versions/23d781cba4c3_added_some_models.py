@@ -23,6 +23,8 @@ def upgrade():
                     sa.Column('name', sa.String(), nullable=False),
                     sa.Column('address', sa.String(), nullable=False),
                     sa.Column('phone', sa.String(), nullable=False),
+                    sa.Column('latitude', sa.Float(), nullable=True),
+                    sa.Column('longitude', sa.Float(), nullable=True),
                     sa.Column('created_at', sa.DateTime(), nullable=False),
                     sa.Column('updated_at', sa.DateTime(), nullable=False),
                     sa.Column('is_deleted', sa.Boolean(), nullable=False)

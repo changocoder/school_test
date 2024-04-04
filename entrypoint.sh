@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-sleep 5
+sleep 10
 
 flask db upgrade
 # wait for the database to be ready

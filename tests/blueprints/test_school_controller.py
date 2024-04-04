@@ -1,3 +1,5 @@
+from unittest import mock
+
 from app.services.school import AttendanceService
 from app.services.school import ClassroomService
 from app.services.school import CourseService
@@ -285,11 +287,15 @@ class TestAttendanceController(ShcoolDBTest):
             "name": "Test School",
             "address": "Test Address",
             "phone": "123456789",
+            "latitude": -34.603722,
+            "longitude": -58.381592,
         }
         self.school_data2 = {
             "name": "Test School2",
             "address": "Test Address",
             "phone": "123456789",
+            "latitude": -34.603722,
+            "longitude": -58.381592,
         }
         self.school_obj = self.school_service.create(**self.school_data)
         self.school_obj2 = self.school_service.create(**self.school_data2)
@@ -367,7 +373,11 @@ class TestAttendanceController(ShcoolDBTest):
         self.student_obj_2 = self.student_service.create(**self.student_data_2)
         self.student_obj_3 = self.student_service.create(**self.student_data_3)
 
-    def test_create_attendance_controller(self):
+    @mock.patch(
+        "app.services.school.AttendanceService.get_is_raining", return_value=False
+    )
+    def test_create_attendance_controller(self, mock_get_is_raining):
+
         data = {
             "course_id": str(self.course_obj.id),
             "date": "2024-03-01",
@@ -383,11 +393,13 @@ class TestAttendanceController(ShcoolDBTest):
                 },
             ],
         }
+
         response = self.client.post(
             "/api/v1/attendance/", json=data, headers=self.headers
         )
 
         self.assertEqual(response.status_code, 201)
+        mock_get_is_raining.assert_called_once()
 
     def test_get_attendance_controller(self):
         data = {

@@ -19,9 +19,8 @@ services:
     networks:
       - school-network
     environment:
-      POSTGRES_DB: dbschool
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: test_dbschool
+
 
   school-api:
     build: .
