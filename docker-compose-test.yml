@@ -5,17 +5,12 @@ networks:
     name: school-network
     external: true
 
-volumes:
-  psqlvolume:
-    driver: local
 
 services:
   school-db:
     image: postgres:11.4
     ports:
       - "5432:5432"
-    volumes:
-      - psqlvolume:/var/lib/postgresql/data/
     networks:
       - school-network
     environment:
